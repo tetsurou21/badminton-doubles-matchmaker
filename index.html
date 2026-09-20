@@ -779,6 +779,161 @@
       .btn-main {
         order: 1;
       }
+    /* サークル名簿 モーダル */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius);
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(16px);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--gray-50);
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--gray-500);
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--gray-800);
+      background: var(--gray-200);
+    }
+
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--gray-50);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* 名簿グリッド・チップ */
+    .roster-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 8px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+    }
+
+    .roster-chip {
+      padding: 7px 12px;
+      border-radius: 9999px;
+      border: 1.5px solid var(--gray-300);
+      background: white;
+      color: var(--gray-700);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .roster-chip:hover {
+      border-color: var(--primary-light);
+      background: var(--primary-bg);
+    }
+
+    .roster-chip.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 4px rgba(15, 118, 110, 0.25);
+    }
+
+    .roster-chip .chip-del {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      padding: 2px 5px;
+      border-radius: 50%;
+      margin-left: 2px;
+    }
+
+    .roster-chip .chip-del:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .roster-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
   </style>
 </head>
@@ -846,36 +1001,13 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">
-          <span>👥 参加メンバー一覧</span>
+          <span>👥 本日の参加メンバー</span>
           <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="totalCountDisplay">0</span> 名）</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <label for="sampleCountSelect" style="font-size: 0.8rem; color: var(--gray-600);">サンプル:</label>
-          <select id="sampleCountSelect" style="padding: 3px 6px; font-size: 0.8rem; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); background: white; color: var(--gray-800); outline: none; cursor: pointer;">
-            <option value="4">4名</option>
-            <option value="5">5名</option>
-            <option value="6">6名</option>
-            <option value="7">7名</option>
-            <option value="8">8名</option>
-            <option value="9">9名</option>
-            <option value="10" selected>10名</option>
-            <option value="11">11名</option>
-            <option value="12">12名</option>
-            <option value="13">13名</option>
-            <option value="14">14名</option>
-            <option value="15">15名</option>
-            <option value="16">16名</option>
-            <option value="17">17名</option>
-            <option value="18">18名</option>
-            <option value="19">19名</option>
-            <option value="20">20名</option>
-            <option value="21">21名</option>
-            <option value="22">22名</option>
-            <option value="23">23名</option>
-            <option value="24">24名</option>
-            <option value="25">25名</option>
-          </select>
-          <button class="btn-sm-text" onclick="loadSampleData()" style="font-weight: 600; cursor: pointer;">投入</button>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-main" style="padding: 7px 14px; font-size: 0.85rem; width: auto; box-shadow: none;" onclick="openRosterModal()">
+            📋 名簿から出席者を選択 (<span id="rosterCountBadge">0/0</span>)
+          </button>
         </div>
       </div>
       <div class="card-body">
@@ -918,8 +1050,9 @@
           </table>
         </div>
 
-        <div class="footer-actions">
-          <button class="btn-sm-text text-danger" onclick="confirmResetAll()">全データを初期化</button>
+        <div class="footer-actions" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <button class="btn-sm-text" onclick="resetSessionHistory()" style="color: var(--primary); font-weight: 600;">🔄 本日の練習履歴をリセット（名簿は保持）</button>
+          <button class="btn-sm-text text-danger" onclick="confirmResetAll()">全データ（名簿含む）を初期化</button>
         </div>
       </div>
     </div>
@@ -968,6 +1101,81 @@
     </div>
 
   </main>
+ 
+  <!-- サークル名簿 & 出席者選択モーダル -->
+  <div id="rosterModal" class="modal-overlay" onclick="if(event.target===this) closeRosterModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>📋 サークル名簿 ＆ 本日の出席者選択</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeRosterModal()" title="閉じる">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 0.85rem; color: var(--gray-600); line-height: 1.4;">
+          本日参加するメンバーをタップして選択（<b style="color: var(--primary);">緑色</b>）してください。<br>
+          ※ サークル名簿は練習履歴をリセットしても保持されます。
+        </div>
+
+        <!-- コントロールバー -->
+        <div class="roster-controls-bar">
+          <div style="font-size: 0.9rem; font-weight: 700; color: var(--gray-800);">
+            出席選択: <span id="rosterSelectedNum" style="color: var(--primary); font-size: 1.15rem;">0</span> / <span id="rosterTotalNum">0</span> 名
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="court-btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--gray-200);" onclick="selectAllRoster()">全選択</button>
+            <button class="court-btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--gray-200);" onclick="deselectAllRoster()">全解除</button>
+          </div>
+        </div>
+
+        <!-- 名簿チップ一覧 -->
+        <div class="roster-grid" id="rosterChipsContainer">
+          <!-- JSで動的生成 -->
+        </div>
+
+        <!-- 名簿へのメンバー追加エリア -->
+        <div style="border-top: 1px solid var(--gray-200); padding-top: 14px; margin-top: 4px;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--gray-700); margin-bottom: 8px;">＋ 名簿にメンバーを新規追加</div>
+          
+          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+            <input type="text" id="newMasterMemberName" class="text-input" style="padding: 7px 12px; font-size: 0.85rem;" placeholder="メンバー名 (例: 田中)" onkeydown="if(event.key==='Enter') addMasterMember()">
+            <button class="btn-add" style="padding: 7px 16px; font-size: 0.85rem;" onclick="addMasterMember()">追加</button>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <button class="bulk-input-toggle" style="margin-bottom: 0;" onclick="toggleRosterBulkArea()">＋ 複数名を一括登録</button>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 0.75rem; color: var(--gray-600);">サンプル名簿:</span>
+              <select id="masterSampleCountSelect" style="padding: 2px 4px; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px; background: white; outline: none; cursor: pointer;">
+                <option value="4">4名</option>
+                <option value="8">8名</option>
+                <option value="10" selected>10名</option>
+                <option value="12">12名</option>
+                <option value="16">16名</option>
+                <option value="20">20名</option>
+                <option value="25">25名</option>
+              </select>
+              <button class="btn-sm-text" style="font-size: 0.75rem; font-weight: bold; cursor: pointer;" onclick="loadSampleToMaster()">名簿に投入</button>
+            </div>
+          </div>
+
+          <div class="bulk-area" id="rosterBulkArea" style="margin-top: 8px;">
+            <textarea id="rosterBulkMemberNames" placeholder="山田&#10;佐藤&#10;鈴木... (改行またはカンマ区切り)"></textarea>
+            <div style="margin-top: 6px; text-align: right;">
+              <button class="btn-add" style="padding: 4px 12px; font-size: 0.8rem;" onclick="addBulkMasterMembers()">一括追加する</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="closeRosterModal()">キャンセル</button>
+        <button class="btn-main" style="padding: 8px 20px; font-size: 0.95rem; width: auto;" onclick="applyRosterToSession()">
+          <span>✅ 選択したメンバーを本日の練習に反映</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast">メッセージ</div>
 
@@ -980,7 +1188,8 @@
     let state = {
       courtCount: 2,
       currentRound: 0,
-      members: [], // { id, name, status: 'active' | 'resting' | 'left', matchCount: 0, availableRounds: 0, consecutiveRest: 0, consecutivePlay: 0 }
+      masterMembers: [], // { id, name } 恒久的なサークル名簿
+      members: [], // { id, name, status: 'active' | 'resting' | 'left', matchCount: 0, availableRounds: 0, consecutiveRest: 0, consecutivePlay: 0 } 本日の練習メンバー
       rounds: [],  // { roundNumber, matches: [ { court, teamA: [id, id], teamB: [id, id] } ], resting: [id] }
       pairCounts: {}, // `${id1}_${id2}`: count (常に昇順ID)
       oppCounts: {}   // `${id1}_${id2}`: count (常に昇順ID)
@@ -1005,6 +1214,13 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           state = JSON.parse(saved);
+          if (!state.masterMembers) {
+            state.masterMembers = [];
+          }
+          // 後方互換性: masterMembersが空でmembersが存在する場合、自動マイグレーション
+          if (state.masterMembers.length === 0 && state.members && state.members.length > 0) {
+            state.masterMembers = state.members.map(m => ({ id: m.id, name: m.name }));
+          }
         }
       } catch (e) {
         console.error('Failed to parse state', e);
@@ -1033,8 +1249,9 @@
         return;
       }
 
+      const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       state.members.push({
-        id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        id: newId,
         name: name,
         status: 'active',
         matchCount: 0,
@@ -1042,6 +1259,11 @@
         consecutiveRest: 0,
         consecutivePlay: 0
       });
+
+      // 名簿にも自動同期
+      if (!state.masterMembers.some(m => m.name === name)) {
+        state.masterMembers.push({ id: newId, name: name });
+      }
 
       input.value = '';
       saveState();
@@ -1064,8 +1286,9 @@
 
       names.forEach(name => {
         if (!state.members.some(m => m.name === name)) {
+          const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
           state.members.push({
-            id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            id: newId,
             name: name,
             status: 'active',
             matchCount: 0,
@@ -1073,6 +1296,9 @@
             consecutiveRest: 0,
             consecutivePlay: 0
           });
+          if (!state.masterMembers.some(m => m.name === name)) {
+            state.masterMembers.push({ id: newId, name: name });
+          }
           added++;
         }
       });
@@ -1108,12 +1334,15 @@
       const member = state.members.find(m => m.id === memberId);
       if (!member) return;
 
-      if (!confirm(`「${member.name}」を削除してもよろしいですか？`)) return;
+      if (!confirm(`「${member.name}」を本日の練習メンバーから削除してもよろしいですか？\n※サークル名簿には残ります`)) return;
 
       state.members = state.members.filter(m => m.id !== memberId);
+      if (state.rounds.length > 0) {
+        recalculateAllFromScratch();
+      }
       saveState();
       renderAll();
-      showToast(`「${member.name}」を削除しました`);
+      showToast(`「${member.name}」を本日のメンバーから削除しました`);
     }
 
     function setCourtCount(count) {
@@ -1122,12 +1351,225 @@
       renderAll();
     }
 
-    function loadSampleData(customCount) {
-      const select = document.getElementById('sampleCountSelect');
-      const count = customCount || (select ? parseInt(select.value, 10) : 10) || 10;
-      const targetCount = Math.min(25, Math.max(1, count));
+    // 本日の練習履歴のみをリセット（名簿はそのまま保持）
+    function resetSessionHistory() {
+      if (state.rounds.length === 0 && state.members.length === 0) {
+        showToast("リセット対象のデータがありません");
+        return;
+      }
 
-      if (state.members.length > 0 && !confirm(`現在のメンバーを上書きしてサンプルメンバー ${targetCount} 名を読み込みますか？`)) {
+      if (!confirm(`【本日の練習履歴をリセット】\nサークル名簿（全 ${state.masterMembers.length} 名）は保持したまま、\n本日の試合履歴・試合数・ペア回数のみをリセットしますか？`)) {
+        return;
+      }
+
+      state.currentRound = 0;
+      state.rounds = [];
+      state.pairCounts = {};
+      state.oppCounts = {};
+      state.members.forEach(m => {
+        m.status = 'active';
+        m.matchCount = 0;
+        m.availableRounds = 0;
+        m.consecutiveRest = 0;
+        m.consecutivePlay = 0;
+      });
+
+      saveState();
+      renderAll();
+      showToast("本日の練習履歴をリセットしました（名簿は保持）");
+    }
+
+    // 全データ（名簿含む）完全リセット
+    function confirmResetAll() {
+      if (!confirm("【全データ完全初期化】\nサークル名簿も含め、全てのデータ（名簿・メンバー・試合履歴）を初期化しますか？")) return;
+      state = {
+        courtCount: 2,
+        currentRound: 0,
+        masterMembers: [],
+        members: [],
+        rounds: [],
+        pairCounts: {},
+        oppCounts: {}
+      };
+      saveState();
+      renderAll();
+      showToast("全データを初期化しました");
+    }
+
+    /* ==========================================================================
+       サークル名簿 (Roster) 操作
+       ========================================================================== */
+    let tempSelectedRosterIds = new Set();
+
+    function openRosterModal() {
+      // 現在本日の参加メンバーを初期選択状態に
+      tempSelectedRosterIds = new Set(state.members.map(m => m.id));
+      renderRosterModalContent();
+      document.getElementById('rosterModal').classList.add('open');
+    }
+
+    function closeRosterModal() {
+      document.getElementById('rosterModal').classList.remove('open');
+    }
+
+    function toggleRosterSelection(id) {
+      if (tempSelectedRosterIds.has(id)) {
+        tempSelectedRosterIds.delete(id);
+      } else {
+        tempSelectedRosterIds.add(id);
+      }
+      renderRosterModalContent();
+    }
+
+    function selectAllRoster() {
+      state.masterMembers.forEach(m => tempSelectedRosterIds.add(m.id));
+      renderRosterModalContent();
+    }
+
+    function deselectAllRoster() {
+      tempSelectedRosterIds.clear();
+      renderRosterModalContent();
+    }
+
+    function renderRosterModalContent() {
+      const container = document.getElementById('rosterChipsContainer');
+      const selectedNum = document.getElementById('rosterSelectedNum');
+      const totalNum = document.getElementById('rosterTotalNum');
+
+      selectedNum.textContent = tempSelectedRosterIds.size;
+      totalNum.textContent = state.masterMembers.length;
+
+      if (state.masterMembers.length === 0) {
+        container.innerHTML = `
+          <div style="width: 100%; text-align: center; color: var(--gray-500); padding: 24px; font-size: 0.85rem;">
+            名簿にメンバーが登録されていません。<br>下の「＋ 名簿にメンバーを新規追加」または「サンプル名簿」を投入してください。
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.masterMembers.map(m => {
+        const isChecked = tempSelectedRosterIds.has(m.id);
+        return `
+          <div class="roster-chip ${isChecked ? 'checked' : ''}" onclick="toggleRosterSelection('${m.id}')">
+            <span>${isChecked ? '✓' : '○'}</span>
+            <span>${escapeHtml(m.name)}</span>
+            <span class="chip-del" onclick="event.stopPropagation(); deleteMasterMember('${m.id}')" title="名簿から削除">✕</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyRosterToSession() {
+      const selectedIds = Array.from(tempSelectedRosterIds);
+      if (selectedIds.length === 0) {
+        if (!confirm("出席者が0名ですが、本日の参加メンバーを空にしますか？")) return;
+      }
+
+      const existingMap = new Map(state.members.map(m => [m.id, m]));
+      const masterMap = new Map(state.masterMembers.map(m => [m.id, m.name]));
+
+      const newMembers = [];
+      selectedIds.forEach(id => {
+        if (existingMap.has(id)) {
+          const existing = existingMap.get(id);
+          if (existing.status === 'left') existing.status = 'active';
+          newMembers.push(existing);
+        } else if (masterMap.has(id)) {
+          newMembers.push({
+            id: id,
+            name: masterMap.get(id),
+            status: 'active',
+            matchCount: 0,
+            availableRounds: 0,
+            consecutiveRest: 0,
+            consecutivePlay: 0
+          });
+        }
+      });
+
+      state.members = newMembers;
+      if (state.rounds.length > 0) {
+        recalculateAllFromScratch();
+      }
+
+      saveState();
+      renderAll();
+      closeRosterModal();
+      showToast(`本日の練習メンバーに ${newMembers.length} 名を反映しました`);
+    }
+
+    function addMasterMember() {
+      const input = document.getElementById('newMasterMemberName');
+      const name = input.value.trim();
+      if (!name) return;
+
+      if (state.masterMembers.some(m => m.name === name)) {
+        showToast(`「${name}」は既に名簿に登録されています`);
+        return;
+      }
+
+      const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      state.masterMembers.push({ id: newId, name: name });
+      tempSelectedRosterIds.add(newId);
+
+      input.value = '';
+      saveState();
+      renderRosterModalContent();
+      renderControls();
+      showToast(`名簿に「${name}」を追加しました`);
+    }
+
+    function toggleRosterBulkArea() {
+      const area = document.getElementById('rosterBulkArea');
+      area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addBulkMasterMembers() {
+      const textarea = document.getElementById('rosterBulkMemberNames');
+      const text = textarea.value;
+      if (!text.trim()) return;
+
+      const names = text.split(/[\n,、]+/).map(n => n.trim()).filter(n => n.length > 0);
+      let added = 0;
+
+      names.forEach(name => {
+        if (!state.masterMembers.some(m => m.name === name)) {
+          const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+          state.masterMembers.push({ id: newId, name: name });
+          tempSelectedRosterIds.add(newId);
+          added++;
+        }
+      });
+
+      textarea.value = '';
+      toggleRosterBulkArea();
+      saveState();
+      renderRosterModalContent();
+      renderControls();
+      showToast(`名簿に ${added} 名を一括追加しました`);
+    }
+
+    function deleteMasterMember(id) {
+      const member = state.masterMembers.find(m => m.id === id);
+      if (!member) return;
+
+      if (!confirm(`名簿から「${member.name}」を削除しますか？`)) return;
+
+      state.masterMembers = state.masterMembers.filter(m => m.id !== id);
+      tempSelectedRosterIds.delete(id);
+
+      saveState();
+      renderRosterModalContent();
+      renderControls();
+      showToast(`名簿から「${member.name}」を削除しました`);
+    }
+
+    function loadSampleToMaster() {
+      const select = document.getElementById('masterSampleCountSelect');
+      const count = parseInt(select.value, 10) || 10;
+
+      if (state.masterMembers.length > 0 && !confirm(`現在のサークル名簿を上書きしてサンプルメンバー ${count} 名を読み込みますか？`)) {
         return;
       }
 
@@ -1139,39 +1581,19 @@
         "山崎", "森", "池田", "橋本", "阿部"
       ];
 
-      const selectedNames = sampleNames.slice(0, targetCount);
-      state.members = selectedNames.map((name, idx) => ({
+      const selected = sampleNames.slice(0, count);
+      state.masterMembers = selected.map((name, idx) => ({
         id: 'm_sample_' + idx,
-        name: name,
-        status: 'active',
-        matchCount: 0,
-        availableRounds: 0,
-        consecutiveRest: 0,
-        consecutivePlay: 0
+        name: name
       }));
-      state.rounds = [];
-      state.currentRound = 0;
-      state.pairCounts = {};
-      state.oppCounts = {};
+
+      // 全選択状態にする
+      tempSelectedRosterIds = new Set(state.masterMembers.map(m => m.id));
 
       saveState();
-      renderAll();
-      showToast(`サンプルメンバー ${targetCount} 名を登録しました`);
-    }
-
-    function confirmResetAll() {
-      if (!confirm("本当に全ての試合履歴・メンバー情報をリセットしますか？")) return;
-      state = {
-        courtCount: 2,
-        currentRound: 0,
-        members: [],
-        rounds: [],
-        pairCounts: {},
-        oppCounts: {}
-      };
-      saveState();
-      renderAll();
-      showToast("全データをリセットしました");
+      renderRosterModalContent();
+      renderControls();
+      showToast(`サークル名簿にサンプル ${count} 名を登録しました`);
     }
 
     /* ==========================================================================
@@ -1468,7 +1890,9 @@
        ========================================================================== */
     function getMemberName(id) {
       const m = state.members.find(x => x.id === id);
-      return m ? m.name : '不明';
+      if (m) return m.name;
+      const mm = state.masterMembers ? state.masterMembers.find(x => x.id === id) : null;
+      return mm ? mm.name : '不明';
     }
 
     function renderAll() {
@@ -1498,6 +1922,12 @@
       document.getElementById('activeCountDisplay').textContent = activeMembers.length;
       document.getElementById('totalCountDisplay').textContent = state.members.length;
       document.getElementById('neededCountDisplay').textContent = state.courtCount * 4;
+
+      // 名簿バッジ更新
+      const rosterBadge = document.getElementById('rosterCountBadge');
+      if (rosterBadge) {
+        rosterBadge.textContent = `${state.members.length}/${state.masterMembers.length}名`;
+      }
 
       // 生成ボタンの制御
       const btnNext = document.getElementById('btnNextMatch');
