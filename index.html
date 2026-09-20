@@ -1005,8 +1005,11 @@
           <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="totalCountDisplay">0</span> 名）</span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-main" style="padding: 7px 14px; font-size: 0.85rem; width: auto; box-shadow: none;" onclick="openRosterModal()">
-            📋 名簿から出席者を選択 (<span id="rosterCountBadge">0/0</span>)
+          <button class="btn-main" style="padding: 7px 14px; font-size: 0.85rem; width: auto; box-shadow: none;" onclick="openAttendanceModal()">
+            📋 出席者を選択 (<span id="rosterCountBadge">0/0名</span>)
+          </button>
+          <button class="btn-secondary" style="padding: 7px 12px; font-size: 0.85rem; width: auto;" onclick="openMasterRosterModal()">
+            ⚙️ 名簿の管理・登録
           </button>
         </div>
       </div>
@@ -1102,19 +1105,19 @@
 
   </main>
  
-  <!-- サークル名簿 & 出席者選択モーダル -->
-  <div id="rosterModal" class="modal-overlay" onclick="if(event.target===this) closeRosterModal()">
+  <!-- 1. 本日の出席者選択モーダル -->
+  <div id="attendanceModal" class="modal-overlay" onclick="if(event.target===this) closeAttendanceModal()">
     <div class="modal-content">
       <div class="modal-header">
         <div class="modal-title">
-          <span>📋 サークル名簿 ＆ 本日の出席者選択</span>
+          <span>📋 本日の出席者を選択</span>
         </div>
-        <button class="modal-close-btn" onclick="closeRosterModal()" title="閉じる">✕</button>
+        <button class="modal-close-btn" onclick="closeAttendanceModal()" title="閉じる">✕</button>
       </div>
       <div class="modal-body">
         <div style="font-size: 0.85rem; color: var(--gray-600); line-height: 1.4;">
-          本日参加するメンバーをタップして選択（<b style="color: var(--primary);">緑色</b>）してください。<br>
-          ※ サークル名簿は練習履歴をリセットしても保持されます。
+          名簿から本日参加するメンバーをタップして選択（<b style="color: var(--primary);">緑色</b>）してください。<br>
+          選択したメンバーが本日の練習試合の組み合わせ対象になります。
         </div>
 
         <!-- コントロールバー -->
@@ -1129,49 +1132,93 @@
         </div>
 
         <!-- 名簿チップ一覧 -->
-        <div class="roster-grid" id="rosterChipsContainer">
+        <div class="roster-grid" id="rosterChipsContainer" style="max-height: 360px;">
           <!-- JSで動的生成 -->
         </div>
 
-        <!-- 名簿へのメンバー追加エリア -->
-        <div style="border-top: 1px solid var(--gray-200); padding-top: 14px; margin-top: 4px;">
-          <div style="font-weight: 700; font-size: 0.85rem; color: var(--gray-700); margin-bottom: 8px;">＋ 名簿にメンバーを新規追加</div>
-          
-          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-            <input type="text" id="newMasterMemberName" class="text-input" style="padding: 7px 12px; font-size: 0.85rem;" placeholder="メンバー名 (例: 田中)" onkeydown="if(event.key==='Enter') addMasterMember()">
-            <button class="btn-add" style="padding: 7px 16px; font-size: 0.85rem;" onclick="addMasterMember()">追加</button>
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed var(--gray-300);">
+          <span style="font-size: 0.8rem; color: var(--gray-500);">名簿にいないメンバーを追加したい場合：</span>
+          <button class="btn-sm-text" style="color: var(--primary); font-weight: 700;" onclick="switchToMasterRosterModal()">⚙️ 名簿の追加・編集画面を開く →</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="closeAttendanceModal()">キャンセル</button>
+        <button class="btn-main" style="padding: 8px 20px; font-size: 0.95rem; width: auto;" onclick="applyRosterToSession()">
+          <span>✅ 選択したメンバーを本日の練習に反映</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <button class="bulk-input-toggle" style="margin-bottom: 0;" onclick="toggleRosterBulkArea()">＋ 複数名を一括登録</button>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; color: var(--gray-600);">サンプル名簿:</span>
-              <select id="masterSampleCountSelect" style="padding: 2px 4px; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px; background: white; outline: none; cursor: pointer;">
-                <option value="4">4名</option>
-                <option value="8">8名</option>
-                <option value="10" selected>10名</option>
-                <option value="12">12名</option>
-                <option value="16">16名</option>
-                <option value="20">20名</option>
-                <option value="25">25名</option>
-              </select>
-              <button class="btn-sm-text" style="font-size: 0.75rem; font-weight: bold; cursor: pointer;" onclick="loadSampleToMaster()">名簿に投入</button>
-            </div>
+  <!-- 2. サークル名簿 管理・登録モーダル（本日の参加メンバー追加に合わせた表形式デザイン） -->
+  <div id="masterRosterModal" class="modal-overlay" onclick="if(event.target===this) closeMasterRosterModal()">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>📁 サークル名簿の管理・登録</span>
+          <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="masterTotalCountDisplay">0</span> 名）</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <label for="masterSampleSelect" style="font-size: 0.75rem; color: var(--gray-600);">サンプル名簿:</label>
+            <select id="masterSampleSelect" style="padding: 2px 4px; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px; background: white; outline: none; cursor: pointer;">
+              <option value="4">4名</option>
+              <option value="8">8名</option>
+              <option value="10" selected>10名</option>
+              <option value="12">12名</option>
+              <option value="16">16名</option>
+              <option value="20">20名</option>
+              <option value="25">25名</option>
+            </select>
+            <button class="btn-sm-text" style="font-size: 0.75rem; font-weight: bold; cursor: pointer;" onclick="loadSampleToMaster()">投入</button>
           </div>
+          <button class="modal-close-btn" onclick="closeMasterRosterModal()" title="閉じる">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        
+        <div class="info-banner">
+          💡 <b>サークル名簿（マスター）について</b><br>
+          ここで登録したメンバーは、毎回の練習履歴をリセットしても消えずにずっと保存されます。<br>
+          練習日には、この名簿から出席者をチェックするだけで簡単に練習を始められます。
+        </div>
 
-          <div class="bulk-area" id="rosterBulkArea" style="margin-top: 8px;">
-            <textarea id="rosterBulkMemberNames" placeholder="山田&#10;佐藤&#10;鈴木... (改行またはカンマ区切り)"></textarea>
-            <div style="margin-top: 6px; text-align: right;">
-              <button class="btn-add" style="padding: 4px 12px; font-size: 0.8rem;" onclick="addBulkMasterMembers()">一括追加する</button>
-            </div>
+        <!-- メンバー登録入力（本日の参加メンバー追加と同一スタイル） -->
+        <div class="member-input-form">
+          <input type="text" id="newMasterInput" class="text-input" placeholder="名簿に追加するメンバーの名前を入力 (例: 田中)" onkeydown="if(event.key==='Enter') addMasterMemberFromForm()">
+          <button class="btn-add" onclick="addMasterMemberFromForm()">名簿に追加</button>
+        </div>
+
+        <button class="bulk-input-toggle" onclick="toggleMasterBulkArea()">＋ 複数名を一括登録（改行・カンマ区切り）</button>
+        <div class="bulk-area" id="masterBulkArea">
+          <textarea id="masterBulkNames" placeholder="山田&#10;佐藤&#10;鈴木&#10;高橋... (改行またはカンマ区切り)"></textarea>
+          <div style="margin-top: 6px; text-align: right;">
+            <button class="btn-add" style="padding: 6px 14px; font-size: 0.85rem;" onclick="addBulkMasterMembersFromForm()">一括追加する</button>
           </div>
+        </div>
+
+        <!-- 表形式（テーブル表示） -->
+        <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">No.</th>
+                <th>名前</th>
+                <th>本日の参加状況</th>
+                <th style="text-align: right; width: 60px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="masterMemberTableBody">
+              <!-- 動的描画 -->
+            </tbody>
+          </table>
         </div>
 
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="closeRosterModal()">キャンセル</button>
-        <button class="btn-main" style="padding: 8px 20px; font-size: 0.95rem; width: auto;" onclick="applyRosterToSession()">
-          <span>✅ 選択したメンバーを本日の練習に反映</span>
+        <button class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="closeMasterRosterModal()">閉じる</button>
+        <button class="btn-main" style="padding: 8px 18px; font-size: 0.9rem; width: auto;" onclick="switchToAttendanceModal()">
+          <span>📋 このまま本日の出席者を選択する →</span>
         </button>
       </div>
     </div>
@@ -1397,19 +1444,23 @@
     }
 
     /* ==========================================================================
-       サークル名簿 (Roster) 操作
+       1. 本日の出席者選択 (Attendance)
        ========================================================================== */
     let tempSelectedRosterIds = new Set();
 
-    function openRosterModal() {
-      // 現在本日の参加メンバーを初期選択状態に
+    function openAttendanceModal() {
       tempSelectedRosterIds = new Set(state.members.map(m => m.id));
-      renderRosterModalContent();
-      document.getElementById('rosterModal').classList.add('open');
+      renderAttendanceChips();
+      document.getElementById('attendanceModal').classList.add('open');
     }
 
-    function closeRosterModal() {
-      document.getElementById('rosterModal').classList.remove('open');
+    function closeAttendanceModal() {
+      document.getElementById('attendanceModal').classList.remove('open');
+    }
+
+    function switchToMasterRosterModal() {
+      closeAttendanceModal();
+      openMasterRosterModal();
     }
 
     function toggleRosterSelection(id) {
@@ -1418,20 +1469,20 @@
       } else {
         tempSelectedRosterIds.add(id);
       }
-      renderRosterModalContent();
+      renderAttendanceChips();
     }
 
     function selectAllRoster() {
       state.masterMembers.forEach(m => tempSelectedRosterIds.add(m.id));
-      renderRosterModalContent();
+      renderAttendanceChips();
     }
 
     function deselectAllRoster() {
       tempSelectedRosterIds.clear();
-      renderRosterModalContent();
+      renderAttendanceChips();
     }
 
-    function renderRosterModalContent() {
+    function renderAttendanceChips() {
       const container = document.getElementById('rosterChipsContainer');
       const selectedNum = document.getElementById('rosterSelectedNum');
       const totalNum = document.getElementById('rosterTotalNum');
@@ -1441,8 +1492,9 @@
 
       if (state.masterMembers.length === 0) {
         container.innerHTML = `
-          <div style="width: 100%; text-align: center; color: var(--gray-500); padding: 24px; font-size: 0.85rem;">
-            名簿にメンバーが登録されていません。<br>下の「＋ 名簿にメンバーを新規追加」または「サンプル名簿」を投入してください。
+          <div style="width: 100%; text-align: center; color: var(--gray-500); padding: 32px; font-size: 0.85rem;">
+            名簿にメンバーがまだ登録されていません。<br>
+            下の「⚙️ 名簿の追加・編集画面を開く」からメンバーを登録してください。
           </div>
         `;
         return;
@@ -1451,10 +1503,9 @@
       container.innerHTML = state.masterMembers.map(m => {
         const isChecked = tempSelectedRosterIds.has(m.id);
         return `
-          <div class="roster-chip ${isChecked ? 'checked' : ''}" onclick="toggleRosterSelection('${m.id}')">
+          <div class="roster-chip ${isChecked ? 'checked' : ''}" onclick="toggleRosterSelection('${m.id}')" title="${isChecked ? 'タップで不参加に変更' : 'タップで出席に変更'}">
             <span>${isChecked ? '✓' : '○'}</span>
             <span>${escapeHtml(m.name)}</span>
-            <span class="chip-del" onclick="event.stopPropagation(); deleteMasterMember('${m.id}')" title="名簿から削除">✕</span>
           </div>
         `;
       }).join('');
@@ -1495,12 +1546,78 @@
 
       saveState();
       renderAll();
-      closeRosterModal();
+      closeAttendanceModal();
       showToast(`本日の練習メンバーに ${newMembers.length} 名を反映しました`);
     }
 
-    function addMasterMember() {
-      const input = document.getElementById('newMasterMemberName');
+    /* ==========================================================================
+       2. サークル名簿 管理・登録 (Master Roster Table)
+       ========================================================================== */
+    function openMasterRosterModal() {
+      renderMasterRosterTable();
+      document.getElementById('masterRosterModal').classList.add('open');
+    }
+
+    function closeMasterRosterModal() {
+      document.getElementById('masterRosterModal').classList.remove('open');
+    }
+
+    function switchToAttendanceModal() {
+      closeMasterRosterModal();
+      openAttendanceModal();
+    }
+
+    function toggleMasterBulkArea() {
+      const area = document.getElementById('masterBulkArea');
+      area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function renderMasterRosterTable() {
+      const tbody = document.getElementById('masterMemberTableBody');
+      const countDisplay = document.getElementById('masterTotalCountDisplay');
+      countDisplay.textContent = state.masterMembers.length;
+
+      if (state.masterMembers.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--gray-500); padding: 24px;">
+              名簿に登録されているメンバーがいません。<br>上の入力フォームまたはサンプル投入から追加してください。
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // 現在本日の参加メンバーIDセット
+      const todayMemberIds = new Set(state.members.map(m => m.id));
+
+      tbody.innerHTML = state.masterMembers.map((m, idx) => {
+        const isAttending = todayMemberIds.has(m.id);
+        const statusBadge = isAttending 
+          ? `<span class="status-btn status-active" style="cursor: default; font-size: 0.75rem;">本日参加中</span>` 
+          : `<span class="status-btn" style="background: var(--gray-100); color: var(--gray-500); border-color: var(--gray-300); cursor: default; font-size: 0.75rem;">未選択</span>`;
+
+        return `
+          <tr>
+            <td style="color: var(--gray-500); font-size: 0.8rem;">${idx + 1}</td>
+            <td>
+              <div class="member-name">
+                <span>${escapeHtml(m.name)}</span>
+              </div>
+            </td>
+            <td>
+              ${statusBadge}
+            </td>
+            <td style="text-align: right;">
+              <button class="btn-delete" onclick="deleteMasterMember('${m.id}')" title="名簿から削除">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function addMasterMemberFromForm() {
+      const input = document.getElementById('newMasterInput');
       const name = input.value.trim();
       if (!name) return;
 
@@ -1511,22 +1628,16 @@
 
       const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
       state.masterMembers.push({ id: newId, name: name });
-      tempSelectedRosterIds.add(newId);
 
       input.value = '';
       saveState();
-      renderRosterModalContent();
+      renderMasterRosterTable();
       renderControls();
       showToast(`名簿に「${name}」を追加しました`);
     }
 
-    function toggleRosterBulkArea() {
-      const area = document.getElementById('rosterBulkArea');
-      area.style.display = area.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function addBulkMasterMembers() {
-      const textarea = document.getElementById('rosterBulkMemberNames');
+    function addBulkMasterMembersFromForm() {
+      const textarea = document.getElementById('masterBulkNames');
       const text = textarea.value;
       if (!text.trim()) return;
 
@@ -1537,15 +1648,14 @@
         if (!state.masterMembers.some(m => m.name === name)) {
           const newId = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
           state.masterMembers.push({ id: newId, name: name });
-          tempSelectedRosterIds.add(newId);
           added++;
         }
       });
 
       textarea.value = '';
-      toggleRosterBulkArea();
+      toggleMasterBulkArea();
       saveState();
-      renderRosterModalContent();
+      renderMasterRosterTable();
       renderControls();
       showToast(`名簿に ${added} 名を一括追加しました`);
     }
@@ -1554,19 +1664,26 @@
       const member = state.masterMembers.find(m => m.id === id);
       if (!member) return;
 
-      if (!confirm(`名簿から「${member.name}」を削除しますか？`)) return;
+      if (!confirm(`サークル名簿から「${member.name}」を削除しますか？`)) return;
 
       state.masterMembers = state.masterMembers.filter(m => m.id !== id);
-      tempSelectedRosterIds.delete(id);
+      
+      // もし本日のメンバーにも入っていれば同期して外すか確認
+      if (state.members.some(m => m.id === id)) {
+        state.members = state.members.filter(m => m.id !== id);
+        if (state.rounds.length > 0) {
+          recalculateAllFromScratch();
+        }
+      }
 
       saveState();
-      renderRosterModalContent();
-      renderControls();
+      renderMasterRosterTable();
+      renderAll();
       showToast(`名簿から「${member.name}」を削除しました`);
     }
 
     function loadSampleToMaster() {
-      const select = document.getElementById('masterSampleCountSelect');
+      const select = document.getElementById('masterSampleSelect');
       const count = parseInt(select.value, 10) || 10;
 
       if (state.masterMembers.length > 0 && !confirm(`現在のサークル名簿を上書きしてサンプルメンバー ${count} 名を読み込みますか？`)) {
@@ -1587,11 +1704,8 @@
         name: name
       }));
 
-      // 全選択状態にする
-      tempSelectedRosterIds = new Set(state.masterMembers.map(m => m.id));
-
       saveState();
-      renderRosterModalContent();
+      renderMasterRosterTable();
       renderControls();
       showToast(`サークル名簿にサンプル ${count} 名を登録しました`);
     }
