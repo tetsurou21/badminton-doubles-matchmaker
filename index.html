@@ -779,6 +779,8 @@
       .btn-main {
         order: 1;
       }
+    }
+
     /* サークル名簿 モーダル */
     .modal-overlay {
       position: fixed;
@@ -788,7 +790,7 @@
       bottom: 0;
       background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(2px);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
@@ -799,6 +801,7 @@
     }
 
     .modal-overlay.open {
+      display: flex;
       opacity: 1;
       pointer-events: auto;
     }
@@ -817,8 +820,64 @@
       transition: transform 0.2s ease;
     }
 
+    .modal-content.wide {
+      max-width: 850px;
+    }
+
     .modal-overlay.open .modal-content {
       transform: translateY(0);
+    }
+
+    /* メイン画面ナビゲーションバー */
+    .main-nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .nav-btn {
+      background: white;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      text-align: left;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--primary-light);
+      background: var(--primary-bg);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-btn.primary {
+      border-color: var(--primary);
+      background: linear-gradient(to right, #f0fdfa, #ffffff);
+    }
+
+    .nav-btn.primary:hover {
+      background: #ccfbf1;
+    }
+
+    .nav-badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(15, 118, 110, 0.1);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      white-space: nowrap;
     }
 
     .modal-header {
@@ -954,7 +1013,29 @@
 
   <main>
 
-    <!-- コントロール & 対戦カード エリア -->
+    <!-- メインナビゲーション (3画面へのアクセス) -->
+    <div class="main-nav">
+      <button class="nav-btn primary" onclick="openTodayMembersModal()">
+        <div>
+          <span>👥 本日の参加メンバー</span>
+        </div>
+        <span class="nav-badge" id="navTodayBadge">参加中: 0 名</span>
+      </button>
+      <button class="nav-btn" onclick="openMatrixModal()">
+        <div>
+          <span>📊 各ペアのマトリックス</span>
+        </div>
+        <span style="color: var(--gray-400); font-size: 0.85rem;">表示 →</span>
+      </button>
+      <button class="nav-btn" onclick="openMasterRosterModal()">
+        <div>
+          <span>📁 名簿の管理・登録</span>
+        </div>
+        <span class="nav-badge" id="navMasterBadge">全 0 名</span>
+      </button>
+    </div>
+
+    <!-- コントロール & 対戦カード エリア (組み合わせ生成フォーム & 現在の組み合わせ) -->
     <div class="control-panel">
       <div class="settings-row">
         <div class="setting-group">
@@ -997,23 +1078,40 @@
       </div>
     </div>
 
-    <!-- メンバー管理 エリア -->
+    <!-- 過去の試合履歴 -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">
-          <span>👥 本日の参加メンバー</span>
-          <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="totalCountDisplay">0</span> 名）</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-main" style="padding: 7px 14px; font-size: 0.85rem; width: auto; box-shadow: none;" onclick="openAttendanceModal()">
-            📋 出席者を選択 (<span id="rosterCountBadge">0/0名</span>)
-          </button>
-          <button class="btn-secondary" style="padding: 7px 12px; font-size: 0.85rem; width: auto;" onclick="openMasterRosterModal()">
-            ⚙️ 名簿の管理・登録
-          </button>
+          <span>📋 過去の試合履歴</span>
         </div>
       </div>
       <div class="card-body">
+        <div id="historyContainer">
+          <div style="color: var(--gray-500); font-size: 0.9rem; text-align: center; padding: 12px;">
+            まだ試合が生成されていません。
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+ 
+  <!-- 1. 本日の参加メンバー モーダル -->
+  <div id="todayMembersModal" class="modal-overlay" onclick="if(event.target===this) closeTodayMembersModal()">
+    <div class="modal-content wide">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>👥 本日の参加メンバー</span>
+          <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="totalCountDisplay">0</span> 名）</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn-main" style="padding: 6px 12px; font-size: 0.8rem; width: auto; box-shadow: none;" onclick="openAttendanceModalFromToday()">
+            📋 名簿から出席者を選択
+          </button>
+          <button class="modal-close-btn" onclick="closeTodayMembersModal()" title="閉じる">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
         
         <div class="info-banner">
           💡 <b>途中参加・休憩の公平性ロジック</b><br>
@@ -1036,7 +1134,7 @@
         </div>
 
         <!-- テーブル -->
-        <div class="table-container">
+        <div class="table-container" style="max-height: 320px; overflow-y: auto;">
           <table class="member-table">
             <thead>
               <tr>
@@ -1053,59 +1151,49 @@
           </table>
         </div>
 
-        <div class="footer-actions" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div class="footer-actions" style="justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--gray-200);">
           <button class="btn-sm-text" onclick="resetSessionHistory()" style="color: var(--primary); font-weight: 600;">🔄 本日の練習履歴をリセット（名簿は保持）</button>
           <button class="btn-sm-text text-danger" onclick="confirmResetAll()">全データ（名簿含む）を初期化</button>
         </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="padding: 8px 18px; font-size: 0.9rem;" onclick="closeTodayMembersModal()">閉じる</button>
       </div>
     </div>
+  </div>
 
-    <!-- 各ペアの参加数マトリックス -->
-    <div class="card">
-      <div class="card-header" style="cursor: pointer;" onclick="toggleMatrix()">
-        <div class="card-title">
+  <!-- 2. 各ペアの参加数マトリックス モーダル -->
+  <div id="matrixModal" class="modal-overlay" onclick="if(event.target===this) closeMatrixModal()">
+    <div class="modal-content wide">
+      <div class="modal-header">
+        <div class="modal-title">
           <span>📊 各ペアの参加数マトリックス</span>
           <span style="font-size: 0.8rem; font-weight: normal; color: var(--gray-500);">（過去に組んだ回数のクロス集計表）</span>
         </div>
-        <div style="font-size: 0.85rem; color: var(--gray-600); display: flex; align-items: center; gap: 8px;">
-          <span id="matrixToggleText">折りたたむ ▲</span>
-        </div>
+        <button class="modal-close-btn" onclick="closeMatrixModal()" title="閉じる">✕</button>
       </div>
-      <div class="card-body" id="matrixCardBody">
-        <div style="display: flex; gap: 12px; margin-bottom: 10px; font-size: 0.75rem; flex-wrap: wrap; align-items: center;">
+      <div class="modal-body">
+        <div style="display: flex; gap: 12px; margin-bottom: 8px; font-size: 0.75rem; flex-wrap: wrap; align-items: center;">
           <span style="font-weight: bold; color: var(--gray-600);">回数凡例:</span>
           <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:white; border:1px solid var(--gray-300); border-radius: 2px;"></span> 0回 (未ペア)</span>
           <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius: 2px;"></span> 1回</span>
           <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#fef3c7; border:1px solid #fde68a; border-radius: 2px;"></span> 2回</span>
           <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#fee2e2; border:1px solid #fecaca; border-radius: 2px;"></span> 3回以上</span>
         </div>
-        <div class="matrix-container">
+        <div class="matrix-container" style="max-height: 480px;">
           <table class="matrix-table" id="pairMatrixTable">
             <!-- JSで動的描画 -->
           </table>
         </div>
       </div>
-    </div>
-
-    <!-- 過去の試合履歴 -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span>📋 過去の試合履歴</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div id="historyContainer">
-          <div style="color: var(--gray-500); font-size: 0.9rem; text-align: center; padding: 12px;">
-            まだ試合が生成されていません。
-          </div>
-        </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" style="padding: 8px 18px; font-size: 0.9rem;" onclick="closeMatrixModal()">閉じる</button>
       </div>
     </div>
+  </div>
 
-  </main>
- 
-  <!-- 1. 本日の出席者選択モーダル -->
+  <!-- 3. 本日の出席者選択モーダル -->
   <div id="attendanceModal" class="modal-overlay" onclick="if(event.target===this) closeAttendanceModal()">
     <div class="modal-content">
       <div class="modal-header">
@@ -1441,6 +1529,32 @@
       saveState();
       renderAll();
       showToast("全データを初期化しました");
+    }
+
+    /* ==========================================================================
+       モーダル画面の開閉制御
+       ========================================================================== */
+    function openTodayMembersModal() {
+      renderMemberList();
+      document.getElementById('todayMembersModal').classList.add('open');
+    }
+
+    function closeTodayMembersModal() {
+      document.getElementById('todayMembersModal').classList.remove('open');
+    }
+
+    function openAttendanceModalFromToday() {
+      closeTodayMembersModal();
+      openAttendanceModal();
+    }
+
+    function openMatrixModal() {
+      renderPairMatrix();
+      document.getElementById('matrixModal').classList.add('open');
+    }
+
+    function closeMatrixModal() {
+      document.getElementById('matrixModal').classList.remove('open');
     }
 
     /* ==========================================================================
@@ -2037,10 +2151,14 @@
       document.getElementById('totalCountDisplay').textContent = state.members.length;
       document.getElementById('neededCountDisplay').textContent = state.courtCount * 4;
 
-      // 名簿バッジ更新
-      const rosterBadge = document.getElementById('rosterCountBadge');
-      if (rosterBadge) {
-        rosterBadge.textContent = `${state.members.length}/${state.masterMembers.length}名`;
+      // ナビゲーションバッジ更新
+      const navToday = document.getElementById('navTodayBadge');
+      if (navToday) {
+        navToday.textContent = `参加中: ${activeMembers.length} 名 (全 ${state.members.length} 名)`;
+      }
+      const navMaster = document.getElementById('navMasterBadge');
+      if (navMaster) {
+        navMaster.textContent = `全 ${state.masterMembers.length} 名`;
       }
 
       // 生成ボタンの制御
