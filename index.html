@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>バドミントン ダブルス組み合わせメーカー</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-light: #14b8a6;
+      --primary-dark: #0f5c56;
+      --primary-bg: #f0fdfa;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --success: #10b981;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background-color: #f8fafc;
+      color: var(--gray-800);
+      line-height: 1.5;
+      padding-bottom: 80px;
+    }
+
+    /* ヘッダー */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .shuttle-icon {
+      font-size: 1.5rem;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    /* メインコンテナ */
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* カード */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      background-color: var(--gray-50);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 16px 18px;
+    }
+
+    /* コントロールパネル */
+    .control-panel {
+      background: white;
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-md);
+      border: 2px solid var(--primary-light);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    .court-selector {
+      display: flex;
+      gap: 4px;
+      background: var(--gray-100);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+    }
+
+    .court-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--gray-700);
+      transition: all 0.15s;
+    }
+
+    .court-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn-main {
+      flex: 2;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(15, 118, 110, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn-main:active {
+      transform: scale(0.98);
+    }
+
+    .btn-main:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: white;
+      border: 1px solid var(--gray-300);
+      color: var(--gray-700);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-100);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 対戦カードエリア */
+    .match-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .court-card {
+      background: #ffffff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .court-card-header {
+      background: var(--primary-bg);
+      color: var(--primary-dark);
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccfbf1;
+    }
+
+    .court-badge {
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .court-grid {
+      display: grid;
+      grid-template-rows: 1fr auto 1fr;
+      padding: 12px;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .team-box {
+      background: var(--gray-50);
+      border: 1px dashed var(--gray-300);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--gray-800);
+      min-height: 48px;
+    }
+
+    .vs-divider {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--gray-500);
+      letter-spacing: 0.1em;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vs-divider::before, .vs-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--gray-200);
+      margin: 0 8px;
+    }
+
+    .player-chip {
+      background: white;
+      border: 1px solid var(--gray-300);
+      padding: 4px 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .player-chip:hover {
+      border-color: var(--primary);
+      background: var(--primary-bg);
+    }
+
+    .player-chip.selected, .rest-chip.selected {
+      border-color: var(--accent) !important;
+      background: #fef3c7 !important;
+      color: #92400e !important;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px var(--accent);
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* お休みエリア */
+    .rest-box {
+      margin-top: 14px;
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .rest-label {
+      font-weight: 700;
+      color: #854d0e;
+      white-space: nowrap;
+    }
+
+    .rest-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .rest-chip {
+      background: white;
+      border: 1px solid #fde047;
+      color: #713f12;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* メンバー管理 */
+    .member-input-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .text-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .text-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+    }
+
+    .btn-add {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .bulk-input-toggle {
+      font-size: 0.8rem;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+      text-decoration: underline;
+      display: inline-block;
+    }
+
+    .bulk-area {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .bulk-area textarea {
+      width: 100%;
+      height: 80px;
+      padding: 8px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    /* メンバーリスト テーブル */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .member-table th {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      padding: 10px 12px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--gray-200);
+      white-space: nowrap;
+    }
+
+    .member-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--gray-200);
+      vertical-align: middle;
+    }
+
+    .member-table tr:hover {
+      background: var(--gray-50);
+    }
+
+    .member-name {
+      font-weight: 700;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ステータスバッジボタン */
+    .status-btn {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .status-active {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .status-resting {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+
+    .status-left {
+      background: #f1f5f9;
+      color: #64748b;
+      border-color: #cbd5e1;
+      text-decoration: line-through;
+    }
+
+    /* 参加率プログレスバー */
+    .rate-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .rate-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .rate-bar-fill {
+      height: 100%;
+      background: var(--primary-light);
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    .rate-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      width: 44px;
+      text-align: right;
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: var(--gray-400);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+
+    .btn-delete:hover {
+      color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    /* 履歴アコーディオン */
+    .history-item {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .history-header {
+      padding: 10px 14px;
+      background: var(--gray-50);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-content {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: white;
+    }
+
+    /* フッターアクション */
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .btn-sm-text {
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-sm-text:hover {
+      color: var(--gray-800);
+    }
+
+    .btn-sm-text.text-danger:hover {
+      color: var(--danger);
+    }
+
+    /* ペアマトリックス テーブル */
+    .matrix-container {
+      overflow: auto;
+      max-height: 480px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      position: relative;
+      background: white;
+    }
+
+    .matrix-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.8rem;
+      text-align: center;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .matrix-table th, .matrix-table td {
+      border-right: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 6px 10px;
+      white-space: nowrap;
+    }
+
+    /* 列見出し（上部固定） */
+    .matrix-table th {
+      background: var(--gray-100);
+      font-weight: 700;
+      color: var(--gray-700);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* 行見出し（左側固定） */
+    .matrix-table td.row-header {
+      background: var(--gray-50);
+      font-weight: 700;
+      color: var(--gray-800);
+      text-align: left;
+      position: sticky;
+      left: 0;
+      z-index: 20;
+      min-width: 80px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 左上隅（行・列両方固定） */
+    .matrix-table th.corner-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 30;
+      background: var(--gray-200);
+      min-width: 80px;
+    }
+
+    /* セルカラー */
+    .matrix-cell {
+      min-width: 38px;
+      height: 36px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+
+    .matrix-cell.cell-diag {
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+
+    .matrix-cell.cell-zero {
+      color: #cbd5e1;
+    }
+
+    .matrix-cell.cell-one {
+      background: #ecfdf5;
+      color: #047857;
+      font-weight: 700;
+    }
+
+    .matrix-cell.cell-two {
+      background: #fef3c7;
+      color: #b45309;
+      font-weight: 800;
+    }
+
+    .matrix-cell.cell-many {
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 800;
+    }
+
+    .matrix-table tr:hover td {
+      filter: brightness(0.97);
+    }
+
+    /* ポップアップメッセージ (Toast) */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--gray-900);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 説明ツールチップ・バナー */
+    .info-banner {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: #1e40af;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 640px) {
+      .settings-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .court-selector {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .court-btn {
+        flex: 1;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+      .btn-secondary {
+        order: 2;
+      }
+      .btn-main {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="header-content">
+      <div class="header-title">
+        <span class="shuttle-icon">🏸</span>
+        <span>ダブルス組み合わせメーカー</span>
+      </div>
+      <div class="header-badges">
+        <span class="badge" id="headerRoundBadge">第 0 試合</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- コントロール & 対戦カード エリア -->
+    <div class="control-panel">
+      <div class="settings-row">
+        <div class="setting-group">
+          <span class="setting-label">コート面数:</span>
+          <div class="court-selector">
+            <button class="court-btn" onclick="setCourtCount(1)">1面 (4人)</button>
+            <button class="court-btn active" onclick="setCourtCount(2)">2面 (8人)</button>
+            <button class="court-btn" onclick="setCourtCount(3)">3面 (12人)</button>
+          </div>
+        </div>
+        <div class="setting-group" style="font-size: 0.85rem; color: var(--gray-500);">
+          <span>参加中: <b id="activeCountDisplay" style="color: var(--primary);">0</b> 名</span>
+          <span>（必要: <span id="neededCountDisplay">8</span> 名）</span>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-main" id="btnNextMatch" onclick="generateNextRound()">
+          <span>⚡ 次の組み合わせを生成</span>
+        </button>
+        <button class="btn-secondary" id="btnUndoMatch" onclick="undoLastRound()" disabled>
+          <span>↩ 1つ前の試合に戻す</span>
+        </button>
+      </div>
+
+      <!-- 現在の対戦カード表示 -->
+      <div id="currentMatchArea" style="margin-top: 10px;">
+        <div id="matchCardsContainer" class="match-container">
+          <!-- 試合カードが動的に挿入されます -->
+          <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--gray-500); background: var(--gray-50); border-radius: var(--radius-sm); border: 1px dashed var(--gray-300);">
+            メンバーを4人以上登録し、「次の組み合わせを生成」を押してください。
+          </div>
+        </div>
+
+        <!-- 休憩メンバー -->
+        <div class="rest-box" id="restBox" style="display: none;">
+          <span class="rest-label">☕ 今回の待機・休憩:</span>
+          <div class="rest-list" id="restList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- メンバー管理 エリア -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>👥 参加メンバー一覧</span>
+          <span style="font-size: 0.85rem; font-weight: normal; color: var(--gray-500);">（全 <span id="totalCountDisplay">0</span> 名）</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="sampleCountSelect" style="font-size: 0.8rem; color: var(--gray-600);">サンプル:</label>
+          <select id="sampleCountSelect" style="padding: 3px 6px; font-size: 0.8rem; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); background: white; color: var(--gray-800); outline: none; cursor: pointer;">
+            <option value="4">4名</option>
+            <option value="5">5名</option>
+            <option value="6">6名</option>
+            <option value="7">7名</option>
+            <option value="8">8名</option>
+            <option value="9">9名</option>
+            <option value="10" selected>10名</option>
+            <option value="11">11名</option>
+            <option value="12">12名</option>
+            <option value="13">13名</option>
+            <option value="14">14名</option>
+            <option value="15">15名</option>
+            <option value="16">16名</option>
+            <option value="17">17名</option>
+            <option value="18">18名</option>
+            <option value="19">19名</option>
+            <option value="20">20名</option>
+            <option value="21">21名</option>
+            <option value="22">22名</option>
+            <option value="23">23名</option>
+            <option value="24">24名</option>
+            <option value="25">25名</option>
+          </select>
+          <button class="btn-sm-text" onclick="loadSampleData()" style="font-weight: 600; cursor: pointer;">投入</button>
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <div class="info-banner">
+          💡 <b>途中参加・休憩の公平性ロジック</b><br>
+          「参加中」だった総ラウンド数のうち、何回試合に出たか（<b>参加率 = 試合数 ÷ 参加可能数</b>）を均一にします。<br>
+          途中から来た人や休憩から復帰した人は、<b>これからの試合で全体の参加率に合うよう優先的</b>に選出されます。
+        </div>
+
+        <!-- メンバー登録入力 -->
+        <div class="member-input-form">
+          <input type="text" id="newMemberName" class="text-input" placeholder="メンバーの名前を入力 (例: 田中)" onkeydown="if(event.key==='Enter') addMember()">
+          <button class="btn-add" onclick="addMember()">追加</button>
+        </div>
+
+        <button class="bulk-input-toggle" onclick="toggleBulkArea()">＋ 複数名を一括登録（改行・カンマ区切り）</button>
+        <div class="bulk-area" id="bulkArea">
+          <textarea id="bulkMemberNames" placeholder="山田&#10;佐藤&#10;鈴木&#10;高橋..."></textarea>
+          <div style="margin-top: 6px; text-align: right;">
+            <button class="btn-add" style="padding: 6px 14px; font-size: 0.85rem;" onclick="addBulkMembers()">一括追加する</button>
+          </div>
+        </div>
+
+        <!-- テーブル -->
+        <div class="table-container">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>名前</th>
+                <th>状態 (タップで切替)</th>
+                <th>試合数 / 機会</th>
+                <th>参加率</th>
+                <th style="text-align: right;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="memberTableBody">
+              <!-- 動的描画 -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="footer-actions">
+          <button class="btn-sm-text text-danger" onclick="confirmResetAll()">全データを初期化</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 各ペアの参加数マトリックス -->
+    <div class="card">
+      <div class="card-header" style="cursor: pointer;" onclick="toggleMatrix()">
+        <div class="card-title">
+          <span>📊 各ペアの参加数マトリックス</span>
+          <span style="font-size: 0.8rem; font-weight: normal; color: var(--gray-500);">（過去に組んだ回数のクロス集計表）</span>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--gray-600); display: flex; align-items: center; gap: 8px;">
+          <span id="matrixToggleText">折りたたむ ▲</span>
+        </div>
+      </div>
+      <div class="card-body" id="matrixCardBody">
+        <div style="display: flex; gap: 12px; margin-bottom: 10px; font-size: 0.75rem; flex-wrap: wrap; align-items: center;">
+          <span style="font-weight: bold; color: var(--gray-600);">回数凡例:</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:white; border:1px solid var(--gray-300); border-radius: 2px;"></span> 0回 (未ペア)</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius: 2px;"></span> 1回</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#fef3c7; border:1px solid #fde68a; border-radius: 2px;"></span> 2回</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:14px; height:14px; background:#fee2e2; border:1px solid #fecaca; border-radius: 2px;"></span> 3回以上</span>
+        </div>
+        <div class="matrix-container">
+          <table class="matrix-table" id="pairMatrixTable">
+            <!-- JSで動的描画 -->
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 過去の試合履歴 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋 過去の試合履歴</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="historyContainer">
+          <div style="color: var(--gray-500); font-size: 0.9rem; text-align: center; padding: 12px;">
+            まだ試合が生成されていません。
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast">メッセージ</div>
+
+  <script>
+    /* ==========================================================================
+       状態管理 (State)
+       ========================================================================== */
+    const STORAGE_KEY = 'badminton_matchmaker_v1';
+
+    let state = {
+      courtCount: 2,
+      currentRound: 0,
+      members: [], // { id, name, status: 'active' | 'resting' | 'left', matchCount: 0, availableRounds: 0, consecutiveRest: 0, consecutivePlay: 0 }
+      rounds: [],  // { roundNumber, matches: [ { court, teamA: [id, id], teamB: [id, id] } ], resting: [id] }
+      pairCounts: {}, // `${id1}_${id2}`: count (常に昇順ID)
+      oppCounts: {}   // `${id1}_${id2}`: count (常に昇順ID)
+    };
+
+    // 初期化
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderAll();
+    });
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Failed to save to localStorage', e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          state = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Failed to parse state', e);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    /* ==========================================================================
+       メンバー操作
+       ========================================================================== */
+    function addMember() {
+      const input = document.getElementById('newMemberName');
+      const name = input.value.trim();
+      if (!name) return;
+
+      if (state.members.some(m => m.name === name)) {
+        showToast(`「${name}」は既に登録されています`);
+        return;
+      }
+
+      state.members.push({
+        id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        name: name,
+        status: 'active',
+        matchCount: 0,
+        availableRounds: 0,
+        consecutiveRest: 0,
+        consecutivePlay: 0
+      });
+
+      input.value = '';
+      saveState();
+      renderAll();
+      showToast(`「${name}」を追加しました`);
+    }
+
+    function toggleBulkArea() {
+      const area = document.getElementById('bulkArea');
+      area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addBulkMembers() {
+      const textarea = document.getElementById('bulkMemberNames');
+      const text = textarea.value;
+      if (!text.trim()) return;
+
+      const names = text.split(/[\n,、]+/).map(n => n.trim()).filter(n => n.length > 0);
+      let added = 0;
+
+      names.forEach(name => {
+        if (!state.members.some(m => m.name === name)) {
+          state.members.push({
+            id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            name: name,
+            status: 'active',
+            matchCount: 0,
+            availableRounds: 0,
+            consecutiveRest: 0,
+            consecutivePlay: 0
+          });
+          added++;
+        }
+      });
+
+      textarea.value = '';
+      toggleBulkArea();
+      saveState();
+      renderAll();
+      showToast(`${added} 名のメンバーを一括追加しました`);
+    }
+
+    function toggleMemberStatus(memberId) {
+      const member = state.members.find(m => m.id === memberId);
+      if (!member) return;
+
+      // active -> resting -> left -> active
+      if (member.status === 'active') {
+        member.status = 'resting';
+        showToast(`${member.name} を「休憩中」にしました`);
+      } else if (member.status === 'resting') {
+        member.status = 'left';
+        showToast(`${member.name} を「退出」にしました`);
+      } else {
+        member.status = 'active';
+        showToast(`${member.name} を「参加中」に復帰しました`);
+      }
+
+      saveState();
+      renderAll();
+    }
+
+    function deleteMember(memberId) {
+      const member = state.members.find(m => m.id === memberId);
+      if (!member) return;
+
+      if (!confirm(`「${member.name}」を削除してもよろしいですか？`)) return;
+
+      state.members = state.members.filter(m => m.id !== memberId);
+      saveState();
+      renderAll();
+      showToast(`「${member.name}」を削除しました`);
+    }
+
+    function setCourtCount(count) {
+      state.courtCount = count;
+      saveState();
+      renderAll();
+    }
+
+    function loadSampleData(customCount) {
+      const select = document.getElementById('sampleCountSelect');
+      const count = customCount || (select ? parseInt(select.value, 10) : 10) || 10;
+      const targetCount = Math.min(25, Math.max(1, count));
+
+      if (state.members.length > 0 && !confirm(`現在のメンバーを上書きしてサンプルメンバー ${targetCount} 名を読み込みますか？`)) {
+        return;
+      }
+
+      const sampleNames = [
+        "佐藤", "鈴木", "高橋", "田中", "伊藤",
+        "渡辺", "山本", "中村", "小林", "加藤",
+        "吉田", "山田", "佐々木", "山口", "松本",
+        "井上", "木村", "林", "斎藤", "清水",
+        "山崎", "森", "池田", "橋本", "阿部"
+      ];
+
+      const selectedNames = sampleNames.slice(0, targetCount);
+      state.members = selectedNames.map((name, idx) => ({
+        id: 'm_sample_' + idx,
+        name: name,
+        status: 'active',
+        matchCount: 0,
+        availableRounds: 0,
+        consecutiveRest: 0,
+        consecutivePlay: 0
+      }));
+      state.rounds = [];
+      state.currentRound = 0;
+      state.pairCounts = {};
+      state.oppCounts = {};
+
+      saveState();
+      renderAll();
+      showToast(`サンプルメンバー ${targetCount} 名を登録しました`);
+    }
+
+    function confirmResetAll() {
+      if (!confirm("本当に全ての試合履歴・メンバー情報をリセットしますか？")) return;
+      state = {
+        courtCount: 2,
+        currentRound: 0,
+        members: [],
+        rounds: [],
+        pairCounts: {},
+        oppCounts: {}
+      };
+      saveState();
+      renderAll();
+      showToast("全データをリセットしました");
+    }
+
+    /* ==========================================================================
+       組み合わせ生成アルゴリズム (Core Algorithm)
+       ========================================================================== */
+    function getPairKey(id1, id2) {
+      return id1 < id2 ? `${id1}_${id2}` : `${id2}_${id1}`;
+    }
+
+    function getPairCount(id1, id2) {
+      const key = getPairKey(id1, id2);
+      return state.pairCounts[key] || 0;
+    }
+
+    function getOppCount(id1, id2) {
+      const key = getPairKey(id1, id2);
+      return state.oppCounts[key] || 0;
+    }
+
+    function generateNextRound() {
+      const activeMembers = state.members.filter(m => m.status === 'active');
+      const maxPossibleCourts = Math.min(state.courtCount, Math.floor(activeMembers.length / 4));
+
+      if (maxPossibleCourts < 1) {
+        alert("参加中のメンバーが4名未満です。メンバーを追加するか休憩を解除してください。");
+        return;
+      }
+
+      const actualPlayersNeeded = maxPossibleCourts * 4;
+
+      // 1. 参加率による出場選手選出
+      // 参加率: matchCount / availableRounds (availableRounds === 0 の場合は 0)
+      const sorted = [...activeMembers].sort((a, b) => {
+        const rateA = a.availableRounds > 0 ? (a.matchCount / a.availableRounds) : 0;
+        const rateB = b.availableRounds > 0 ? (b.matchCount / b.availableRounds) : 0;
+
+        // 基準1: 参加率が低い人を優先
+        if (Math.abs(rateA - rateB) > 0.0001) {
+          return rateA - rateB;
+        }
+
+        // 基準2: 参加率が同じ場合、連続休憩数が多い人を優先
+        if (b.consecutiveRest !== a.consecutiveRest) {
+          return b.consecutiveRest - a.consecutiveRest;
+        }
+
+        // 基準3: 直前に試合に出ていない人を優先 (連続試合数が少ない人を優先)
+        if (a.consecutivePlay !== b.consecutivePlay) {
+          return a.consecutivePlay - b.consecutivePlay;
+        }
+
+        // 基準4: ランダムタイブレーク
+        return Math.random() - 0.5;
+      });
+
+      const selectedPlayers = sorted.slice(0, actualPlayersNeeded);
+      const benchPlayers = sorted.slice(actualPlayersNeeded); // 参加中だが今回待機の人
+      const restingPlayers = state.members.filter(m => m.status === 'resting'); // 休憩ステータスの人
+
+      // 2. ペアリングと対戦相手の決定 (ペナルティ最小化)
+      const matches = optimizeCourtAssignments(selectedPlayers, maxPossibleCourts);
+
+      // 3. 状態更新
+      state.currentRound++;
+      const selectedIds = new Set(selectedPlayers.map(p => p.id));
+      const benchIds = new Set(benchPlayers.map(p => p.id));
+
+      // 試合履歴に保存
+      state.rounds.push({
+        roundNumber: state.currentRound,
+        matches: matches,
+        bench: benchPlayers.map(p => p.id),
+        resting: restingPlayers.map(p => p.id)
+      });
+
+      // メンバーごとの指標を更新
+      state.members.forEach(m => {
+        if (m.status === 'active') {
+          // アクティブなメンバーのみ機会 (availableRounds) を加算
+          m.availableRounds++;
+          if (selectedIds.has(m.id)) {
+            m.matchCount++;
+            m.consecutivePlay++;
+            m.consecutiveRest = 0;
+          } else {
+            m.consecutiveRest++;
+            m.consecutivePlay = 0;
+          }
+        } else {
+          // 休憩中や退出中のメンバーは機会を加算しない
+          m.consecutivePlay = 0;
+          m.consecutiveRest = 0;
+        }
+      });
+
+      // ペア・対戦カウントの更新
+      matches.forEach(m => {
+        // Team A ペア
+        addPair(m.teamA[0], m.teamA[1]);
+        // Team B ペア
+        addPair(m.teamB[0], m.teamB[1]);
+
+        // 対戦相手
+        addOpp(m.teamA[0], m.teamB[0]);
+        addOpp(m.teamA[0], m.teamB[1]);
+        addOpp(m.teamA[1], m.teamB[0]);
+        addOpp(m.teamA[1], m.teamB[1]);
+      });
+
+      saveState();
+      renderAll();
+      showToast(`第 ${state.currentRound} 試合を生成しました！`);
+    }
+
+    function addPair(id1, id2) {
+      const key = getPairKey(id1, id2);
+      state.pairCounts[key] = (state.pairCounts[key] || 0) + 1;
+    }
+
+    function addOpp(id1, id2) {
+      const key = getPairKey(id1, id2);
+      state.oppCounts[key] = (state.oppCounts[key] || 0) + 1;
+    }
+
+    // 最適化探索 (シャッフルサンプリング + スコア計算)
+    function optimizeCourtAssignments(players, courtCount) {
+      const playerIds = players.map(p => p.id);
+      let bestMatches = null;
+      let bestScore = Infinity;
+
+      // 探索回数 (最大12名なので1500回〜2000回の試行でほぼ最適解が得られる)
+      const iterations = courtCount === 1 ? 3 : 1800;
+
+      for (let i = 0; i < iterations; i++) {
+        // シャッフル
+        const shuffled = [...playerIds].sort(() => Math.random() - 0.5);
+        const currentMatches = [];
+        let score = 0;
+
+        for (let c = 0; c < courtCount; c++) {
+          const p = shuffled.slice(c * 4, c * 4 + 4);
+          const teamA = [p[0], p[1]];
+          const teamB = [p[2], p[3]];
+
+          // ペア重複ペナルティ (ペアの重複は極力避けるため2乗ペナルティ)
+          const pairA = getPairCount(teamA[0], teamA[1]);
+          const pairB = getPairCount(teamB[0], teamB[1]);
+          score += (pairA * 100) + (pairA * pairA * 80);
+          score += (pairB * 100) + (pairB * pairB * 80);
+
+          // 対戦相手重複ペナルティ (ペアよりは低重み)
+          const opp1 = getOppCount(teamA[0], teamB[0]);
+          const opp2 = getOppCount(teamA[0], teamB[1]);
+          const opp3 = getOppCount(teamA[1], teamB[0]);
+          const opp4 = getOppCount(teamA[1], teamB[1]);
+          score += (opp1 + opp2 + opp3 + opp4) * 10;
+
+          currentMatches.push({
+            court: c + 1,
+            teamA,
+            teamB
+          });
+        }
+
+        if (score < bestScore) {
+          bestScore = score;
+          bestMatches = currentMatches;
+          if (bestScore === 0) break; // 完璧な組み合わせが見つかったら即終了
+        }
+      }
+
+      return bestMatches;
+    }
+
+    // 直前の試合を取り消す (Undo)
+    function undoLastRound() {
+      if (state.rounds.length === 0) return;
+      if (!confirm(`第 ${state.currentRound} 試合の組み合わせを取り消しますか？`)) return;
+
+      state.rounds.pop();
+      state.currentRound = Math.max(0, state.currentRound - 1);
+      selectedSwapId = null;
+
+      recalculateAllFromScratch();
+      saveState();
+      renderAll();
+      showToast("直前の試合を取り消しました");
+    }
+
+    // 全ラウンド履歴からデータ整合性を100%再構築
+    function recalculateAllFromScratch() {
+      state.pairCounts = {};
+      state.oppCounts = {};
+      state.members.forEach(m => {
+        m.matchCount = 0;
+        m.availableRounds = 0;
+        m.consecutivePlay = 0;
+        m.consecutiveRest = 0;
+      });
+
+      state.rounds.forEach(round => {
+        const playedIds = new Set();
+        round.matches.forEach(m => {
+          m.teamA.forEach(id => playedIds.add(id));
+          m.teamB.forEach(id => playedIds.add(id));
+
+          addPair(m.teamA[0], m.teamA[1]);
+          addPair(m.teamB[0], m.teamB[1]);
+          addOpp(m.teamA[0], m.teamB[0]);
+          addOpp(m.teamA[0], m.teamB[1]);
+          addOpp(m.teamA[1], m.teamB[0]);
+          addOpp(m.teamA[1], m.teamB[1]);
+        });
+
+        const benchIds = new Set(round.bench || []);
+
+        state.members.forEach(m => {
+          if (playedIds.has(m.id)) {
+            m.availableRounds++;
+            m.matchCount++;
+            m.consecutivePlay++;
+            m.consecutiveRest = 0;
+          } else if (benchIds.has(m.id)) {
+            m.availableRounds++;
+            m.consecutiveRest++;
+            m.consecutivePlay = 0;
+          } else {
+            m.consecutivePlay = 0;
+            m.consecutiveRest = 0;
+          }
+        });
+      });
+    }
+
+    // 選手の手動入れ替え (スワップ)
+    let selectedSwapId = null;
+
+    function handlePlayerSwapClick(playerId) {
+      if (state.rounds.length === 0) return;
+
+      if (!selectedSwapId) {
+        selectedSwapId = playerId;
+        showToast(`「${getMemberName(playerId)}」を選択中。入れ替え先の選手をタップしてください`);
+        renderCurrentMatch();
+        return;
+      }
+
+      if (selectedSwapId === playerId) {
+        selectedSwapId = null;
+        showToast("選択を解除しました");
+        renderCurrentMatch();
+        return;
+      }
+
+      // 入れ替え実行
+      const p1 = selectedSwapId;
+      const p2 = playerId;
+      selectedSwapId = null;
+
+      const latest = state.rounds[state.rounds.length - 1];
+
+      function replaceInMatches(tId, nId) {
+        latest.matches.forEach(m => {
+          m.teamA = m.teamA.map(id => id === tId ? nId : id);
+          m.teamB = m.teamB.map(id => id === tId ? nId : id);
+        });
+      }
+
+      function replaceInArr(arr, tId, nId) {
+        return arr ? arr.map(id => id === tId ? nId : id) : [];
+      }
+
+      const TEMP = '__temp_swap__';
+      replaceInMatches(p1, TEMP);
+      if (latest.bench) latest.bench = replaceInArr(latest.bench, p1, TEMP);
+      if (latest.resting) latest.resting = replaceInArr(latest.resting, p1, TEMP);
+
+      replaceInMatches(p2, p1);
+      if (latest.bench) latest.bench = replaceInArr(latest.bench, p2, p1);
+      if (latest.resting) latest.resting = replaceInArr(latest.resting, p2, p1);
+
+      replaceInMatches(TEMP, p2);
+      if (latest.bench) latest.bench = replaceInArr(latest.bench, TEMP, p2);
+      if (latest.resting) latest.resting = replaceInArr(latest.resting, TEMP, p2);
+
+      recalculateAllFromScratch();
+      saveState();
+      renderAll();
+      showToast(`「${getMemberName(p1)}」と「${getMemberName(p2)}」を入れ替えました`);
+    }
+
+    /* ==========================================================================
+       レンダリング (UI Rendering)
+       ========================================================================== */
+    function getMemberName(id) {
+      const m = state.members.find(x => x.id === id);
+      return m ? m.name : '不明';
+    }
+
+    function renderAll() {
+      renderControls();
+      renderCurrentMatch();
+      renderMemberList();
+      renderPairMatrix();
+      renderHistory();
+    }
+
+    function renderControls() {
+      // バッジ
+      document.getElementById('headerRoundBadge').textContent = `第 ${state.currentRound} 試合`;
+
+      // コートボタン状態
+      const courtButtons = document.querySelectorAll('.court-btn');
+      courtButtons.forEach((btn, idx) => {
+        if (idx + 1 === state.courtCount) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // 人数表示
+      const activeMembers = state.members.filter(m => m.status === 'active');
+      document.getElementById('activeCountDisplay').textContent = activeMembers.length;
+      document.getElementById('totalCountDisplay').textContent = state.members.length;
+      document.getElementById('neededCountDisplay').textContent = state.courtCount * 4;
+
+      // 生成ボタンの制御
+      const btnNext = document.getElementById('btnNextMatch');
+      if (activeMembers.length < 4) {
+        btnNext.disabled = true;
+        btnNext.title = "4名以上のアクティブメンバーが必要です";
+      } else {
+        btnNext.disabled = false;
+        btnNext.title = "";
+      }
+
+      // Undoボタン
+      document.getElementById('btnUndoMatch').disabled = state.rounds.length === 0;
+    }
+
+    function renderCurrentMatch() {
+      const container = document.getElementById('matchCardsContainer');
+      const restBox = document.getElementById('restBox');
+      const restList = document.getElementById('restList');
+
+      if (state.rounds.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: var(--gray-500); background: var(--gray-50); border-radius: var(--radius-sm); border: 1px dashed var(--gray-300);">
+            メンバーを4名以上登録し、「次の組み合わせを生成」を押してください。
+          </div>
+        `;
+        restBox.style.display = 'none';
+        return;
+      }
+
+      const latestRound = state.rounds[state.rounds.length - 1];
+
+      // ガイド表示付き
+      const guideHtml = `
+        <div style="grid-column: 1 / -1; font-size: 0.8rem; color: var(--primary-dark); background: var(--primary-bg); border: 1px solid #99f6e4; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+          <span>💡 選手名をタップして別の選手を選ぶと、手動でペアや待機枠を入れ替えられます</span>
+          ${selectedSwapId ? `<button onclick="selectedSwapId=null;renderCurrentMatch();" style="border:none;background:none;color:var(--danger);font-size:0.75rem;cursor:pointer;font-weight:bold;">✕ 選択解除</button>` : ''}
+        </div>
+      `;
+
+      // コートカードの描画
+      const cardsHtml = latestRound.matches.map(m => `
+        <div class="court-card">
+          <div class="court-card-header">
+            <span>第 ${m.court} コート</span>
+            <span class="court-badge">ダブルス</span>
+          </div>
+          <div class="court-grid">
+            <div class="team-box">
+              <span class="player-chip ${selectedSwapId === m.teamA[0] ? 'selected' : ''}" onclick="handlePlayerSwapClick('${m.teamA[0]}')">${escapeHtml(getMemberName(m.teamA[0]))}</span>
+              <span>&</span>
+              <span class="player-chip ${selectedSwapId === m.teamA[1] ? 'selected' : ''}" onclick="handlePlayerSwapClick('${m.teamA[1]}')">${escapeHtml(getMemberName(m.teamA[1]))}</span>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="team-box">
+              <span class="player-chip ${selectedSwapId === m.teamB[0] ? 'selected' : ''}" onclick="handlePlayerSwapClick('${m.teamB[0]}')">${escapeHtml(getMemberName(m.teamB[0]))}</span>
+              <span>&</span>
+              <span class="player-chip ${selectedSwapId === m.teamB[1] ? 'selected' : ''}" onclick="handlePlayerSwapClick('${m.teamB[1]}')">${escapeHtml(getMemberName(m.teamB[1]))}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = guideHtml + cardsHtml;
+
+      // 待機・休憩メンバーの表示
+      const bench = latestRound.bench || [];
+      const resting = latestRound.resting || [];
+
+      if (bench.length > 0 || resting.length > 0) {
+        restBox.style.display = 'flex';
+        let html = '';
+        if (bench.length > 0) {
+          html += bench.map(id => `
+            <span class="rest-chip ${selectedSwapId === id ? 'selected' : ''}" style="cursor: pointer;" onclick="handlePlayerSwapClick('${id}')" title="タップで試合選手と交代">
+              ⏳ ${escapeHtml(getMemberName(id))}
+            </span>
+          `).join('');
+        }
+        if (resting.length > 0) {
+          html += resting.map(id => `
+            <span class="rest-chip ${selectedSwapId === id ? 'selected' : ''}" style="cursor: pointer; background: #f1f5f9; border-color: #cbd5e1; color: #475569;" onclick="handlePlayerSwapClick('${id}')" title="タップで試合選手と交代">
+              ☕ ${escapeHtml(getMemberName(id))} (休憩中)
+            </span>
+          `).join('');
+        }
+        restList.innerHTML = html;
+      } else {
+        restBox.style.display = 'none';
+      }
+    }
+
+    function renderMemberList() {
+      const tbody = document.getElementById('memberTableBody');
+      if (state.members.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--gray-500); padding: 24px;">
+              メンバーが登録されていません。上から追加してください。
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // ソート: 状態順（参加中 -> 休憩中 -> 退出）
+      const statusOrder = { 'active': 1, 'resting': 2, 'left': 3 };
+      const sorted = [...state.members].sort((a, b) => {
+        if (statusOrder[a.status] !== statusOrder[b.status]) {
+          return statusOrder[a.status] - statusOrder[b.status];
+        }
+        return a.name.localeCompare(b.name, 'ja');
+      });
+
+      tbody.innerHTML = sorted.map(m => {
+        const rate = m.availableRounds > 0 ? Math.round((m.matchCount / m.availableRounds) * 100) : 0;
+
+        let statusClass = 'status-active';
+        let statusText = '参加中';
+        if (m.status === 'resting') {
+          statusClass = 'status-resting';
+          statusText = '一時休憩';
+        } else if (m.status === 'left') {
+          statusClass = 'status-left';
+          statusText = '途中退出';
+        }
+
+        return `
+          <tr>
+            <td>
+              <div class="member-name">
+                <span>${escapeHtml(m.name)}</span>
+              </div>
+            </td>
+            <td>
+              <button class="status-btn ${statusClass}" onclick="toggleMemberStatus('${m.id}')" title="クリックで状態変更">
+                ${statusText} ↻
+              </button>
+            </td>
+            <td>
+              <b>${m.matchCount}</b> <span style="color: var(--gray-500); font-size: 0.8rem;">/ ${m.availableRounds} 試合</span>
+            </td>
+            <td>
+              <div class="rate-bar-container">
+                <div class="rate-bar-bg">
+                  <div class="rate-bar-fill" style="width: ${rate}%;"></div>
+                </div>
+                <span class="rate-text">${rate}%</span>
+              </div>
+            </td>
+            <td style="text-align: right;">
+              <button class="btn-delete" onclick="deleteMember('${m.id}')" title="削除">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyContainer');
+      if (state.rounds.length === 0) {
+        container.innerHTML = `
+          <div style="color: var(--gray-500); font-size: 0.9rem; text-align: center; padding: 12px;">
+            まだ試合が生成されていません。
+          </div>
+        `;
+        return;
+      }
+
+      // 最新順に表示
+      const reversed = [...state.rounds].reverse();
+      container.innerHTML = reversed.map(r => `
+        <div class="history-item">
+          <div class="history-header">
+            <span>第 ${r.roundNumber} 試合</span>
+            <span style="color: var(--gray-500); font-size: 0.8rem;">コート ${r.matches.length}面</span>
+          </div>
+          <div class="history-content">
+            ${r.matches.map(m => `
+              <div>
+                <b>第${m.court}コート:</b> 
+                ${escapeHtml(getMemberName(m.teamA[0]))}・${escapeHtml(getMemberName(m.teamA[1]))} 
+                <span style="color: var(--gray-500); font-size: 0.8rem;">VS</span> 
+                ${escapeHtml(getMemberName(m.teamB[0]))}・${escapeHtml(getMemberName(m.teamB[1]))}
+              </div>
+            `).join('')}
+            ${(r.bench && r.bench.length > 0) || (r.resting && r.resting.length > 0) ? `
+              <div style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px;">
+                ${r.bench && r.bench.length > 0 ? `<span>⏳ 待機: ${r.bench.map(id => escapeHtml(getMemberName(id))).join('、')}</span>` : ''}
+                ${r.resting && r.resting.length > 0 ? `<span>☕ 休憩中: ${r.resting.map(id => escapeHtml(getMemberName(id))).join('、')}</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* ==========================================================================
+       各ペア参加数マトリックスの描画
+       ========================================================================== */
+    let isMatrixCollapsed = false;
+
+    function toggleMatrix() {
+      isMatrixCollapsed = !isMatrixCollapsed;
+      const body = document.getElementById('matrixCardBody');
+      const text = document.getElementById('matrixToggleText');
+      if (isMatrixCollapsed) {
+        body.style.display = 'none';
+        text.textContent = '展開する ▼';
+      } else {
+        body.style.display = 'block';
+        text.textContent = '折りたたむ ▲';
+      }
+    }
+
+    function renderPairMatrix() {
+      const table = document.getElementById('pairMatrixTable');
+      if (!table) return;
+
+      const members = state.members;
+      if (members.length < 2) {
+        table.innerHTML = `
+          <tr>
+            <td style="padding: 24px; color: var(--gray-500); text-align: center;">
+              メンバーが2名以上登録されるとペア参加数マトリックスが表示されます。
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // 列ヘッダー
+      let headerHtml = '<tr><th class="corner-header">選手名</th>';
+      members.forEach(m => {
+        headerHtml += `<th title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</th>`;
+      });
+      headerHtml += '</tr>';
+
+      // 各行の生成
+      let rowsHtml = '';
+      members.forEach((mRow, i) => {
+        rowsHtml += `<tr><td class="row-header" title="${escapeHtml(mRow.name)}">${escapeHtml(mRow.name)}</td>`;
+        members.forEach((mCol, j) => {
+          if (i === j) {
+            rowsHtml += `<td class="matrix-cell cell-diag" title="自分自身">-</td>`;
+          } else {
+            const count = getPairCount(mRow.id, mCol.id);
+            let cellClass = 'cell-zero';
+            if (count === 1) cellClass = 'cell-one';
+            else if (count === 2) cellClass = 'cell-two';
+            else if (count >= 3) cellClass = 'cell-many';
+
+            rowsHtml += `
+              <td class="matrix-cell ${cellClass}" title="${escapeHtml(mRow.name)} &amp; ${escapeHtml(mCol.name)}: ${count}回ペア">
+                ${count > 0 ? count : 0}
+              </td>
+            `;
+          }
+        });
+        rowsHtml += '</tr>';
+      });
+
+      table.innerHTML = `<thead>${headerHtml}</thead><tbody>${rowsHtml}</tbody>`;
+    }
+  </script>
+</body>
+</html>
